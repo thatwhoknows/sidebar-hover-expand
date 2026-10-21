@@ -1,0 +1,148 @@
+/* ============================================================
+ * zen-sidebar-hover — Zen Mod (CSS only, no JavaScript)
+ *
+ * Collapses Zen's vertical tab sidebar (#navigator-toolbox) to an
+ * icon strip and expands it on hover, pushing page content aside.
+ *
+ * CRITICAL: Zen's vertical tab sidebar is #navigator-toolbox, NOT
+ * #sidebar-box (which is Firefox's hidden bookmarks/history sidebar,
+ * shipped with hidden="true" inside #tabbrowser-tabbox).
+ *
+ * Layout: #navigator-toolbox is a flex sibling of #zen-appcontent-wrapper
+ * inside <hbox id="browser">. Widening it naturally pushes content —
+ * no margin on #tabbrowser-tabbox needed.
+ *
+ * Target: Zen ~1.22.x–1.23.x (Firefox 151–158).
+ *
+ * Preference wiring (provided by Zen's mod system):
+ *   string prefs  -> --mod-zen-sidebar-hover-* custom properties at :root
+ *   dropdown pref -> @media (-moz-pref("mod.zen-sidebar-hover.sidebar.mode" = "..."))
+ *   checkbox pref -> @media (-moz-pref("mod.zen-sidebar-hover.sidebar.show-labels-on-hover"))
+ *
+ * Compatibility: only controls min-width / max-width / width on
+ * #navigator-toolbox and opacity on label elements. Does not touch
+ * colors, fonts, spacing, icons, or context menus — safe to combine
+ * with Neo Zen, no-gaps, icon-tweaker, context-menu-icons, and other
+ * Sine / Zen mods.
+ * ============================================================ */
+
+/* ---------- 0. Preference-backed custom properties ---------- */
+:root {
+  --zsh-collapsed-width: var(--mod-zen-sidebar-hover-sidebar-collapsed-width, 60px);
+  --zsh-expanded-width: var(--mod-zen-sidebar-hover-sidebar-expanded-width, 260px);
+  --zsh-transition-duration: var(--mod-zen-sidebar-hover-sidebar-transition-duration, 200ms);
+  --zsh-easing: cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ---------- 1. Collapsed strip (default state) ----------
+ * Pin width with min/max/width !important. Zen's JS sets inline
+ * style.width (persisted via persist="width style"), so !important
+ * is required to override it.
+ *
+ * Specificity: (1, 2, 0) — beats Zen's own collapsed rule
+ * #navigator-toolbox:not([zen-sidebar-expanded="true"]) at (1, 1, 0).
+ *
+ * The :root:not([zen-sidebar-expanded="true"]) gate releases the
+ * mod when Zen's expand button is clicked (Zen sets the attribute
+ * on :root via ZenVerticalTabsManager.mjs:426-431). */
+:root:not([zen-sidebar-expanded="true"]) #navigator-toolbox {
+  min-width: var(--zsh-collapsed-width) !important;
+  max-width: var(--zsh-collapsed-width) !important;
+  width: var(--zsh-collapsed-width) !important;
+  transition:
+    min-width var(--zsh-transition-duration) var(--zsh-easing),
+    max-width var(--zsh-transition-duration) var(--zsh-easing),
+    width var(--zsh-transition-duration) var(--zsh-easing) !important;
+}
+
+/* ---------- 2. Expand on hover ----------
+ * #navigator-toolbox is a flex sibling of #zen-appcontent-wrapper
+ * inside #browser — widening it naturally pushes content right.
+ * :hover carries no persistent state, so it cannot get stuck. */
+:root:not([zen-sidebar-expanded="true"]) #navigator-toolbox:hover {
+  min-width: var(--zsh-expanded-width) !important;
+  max-width: var(--zsh-expanded-width) !important;
+  width: var(--zsh-expanded-width) !important;
+}
+
+/* ---------- 3. Overlay mode (optional) ----------
+ * Negative end-margin makes the expanded sidebar cover content
+ * instead of pushing it. Only active when mode pref = "overlay".
+ * Default (unset) fails safe into push mode. */
+@media (-moz-pref("mod.zen-sidebar-hover.sidebar.mode" = "overlay")) {
+  :root:not([zen-sidebar-expanded="true"]) #navigator-toolbox:hover {
+    position: relative !important;
+    z-index: 100 !important;
+    margin-inline-end: calc(
+      var(--zsh-collapsed-width) - var(--zsh-expanded-width)
+    ) !important;
+  }
+
+  :root:not([zen-sidebar-expanded="true"])[zen-right-side="true"]
+    #navigator-toolbox:hover {
+    margin-inline-end: 0 !important;
+    margin-inline-start: calc(
+      var(--zsh-collapsed-width) - var(--zsh-expanded-width)
+    ) !important;
+  }
+}
+
+/* ---------- 4. Compact mode ----------
+ * Zen's compact mode makes #navigator-toolbox position:fixed +
+ * translate (slides in from edge, sidebar.inc.css:79-88). The
+ * sidebar already overlays content by virtue of fixed positioning
+ * — just ensure z-index. Do NOT override position (Zen's fixed
+ * is correct here). */
+:root[zen-compact-mode="true"]:not([zen-sidebar-expanded="true"])
+  #navigator-toolbox:hover {
+  z-index: 100 !important;
+}
+
+/* ---------- 5. Labels: fade in on hover ----------
+ * Opacity-only (no layout thrash). Targets label elements under
+ * #navigator-toolbox — NOT #sidebar-box (labels live in the
+ * vertical tab strip, not Firefox's hidden bookmarks panel).
+ *
+ * Checkbox checked: fade with transition.
+ * Checkbox unchecked: still appear on hover, just instant (no fade). */
+@media (-moz-pref("mod.zen-sidebar-hover.sidebar.show-labels-on-hover")) {
+  :root:not([zen-sidebar-expanded="true"]) #navigator-toolbox:not(:hover)
+    .tab-label-container,
+  :root:not([zen-sidebar-expanded="true"]) #navigator-toolbox:not(:hover)
+    .toolbarbutton-text,
+  :root:not([zen-sidebar-expanded="true"]) #navigator-toolbox:not(:hover)
+    .zen-current-workspace-indicator-name {
+    opacity: 0 !important;
+    transition: opacity var(--zsh-transition-duration) var(--zsh-easing) !important;
+  }
+
+  :root:not([zen-sidebar-expanded="true"]) #navigator-toolbox:hover
+    .tab-label-container,
+  :root:not([zen-sidebar-expanded="true"]) #navigator-toolbox:hover
+    .toolbarbutton-text,
+  :root:not([zen-sidebar-expanded="true"]) #navigator-toolbox:hover
+    .zen-current-workspace-indicator-name {
+    opacity: 1 !important;
+  }
+}
+
+/* Unchecked: labels still appear on hover, just no fade transition */
+@media not (-moz-pref("mod.zen-sidebar-hover.sidebar.show-labels-on-hover")) {
+  :root:not([zen-sidebar-expanded="true"]) #navigator-toolbox:not(:hover)
+    .tab-label-container,
+  :root:not([zen-sidebar-expanded="true"]) #navigator-toolbox:not(:hover)
+    .toolbarbutton-text,
+  :root:not([zen-sidebar-expanded="true"]) #navigator-toolbox:not(:hover)
+    .zen-current-workspace-indicator-name {
+    opacity: 0 !important;
+  }
+
+  :root:not([zen-sidebar-expanded="true"]) #navigator-toolbox:hover
+    .tab-label-container,
+  :root:not([zen-sidebar-expanded="true"]) #navigator-toolbox:hover
+    .toolbarbutton-text,
+  :root:not([zen-sidebar-expanded="true"]) #navigator-toolbox:hover
+    .zen-current-workspace-indicator-name {
+    opacity: 1 !important;
+  }
+}

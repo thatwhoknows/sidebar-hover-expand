@@ -1,0 +1,39 @@
+[
+  {
+    "property": "mod.zen-sidebar-hover.sidebar.collapsed-width",
+    "label": "Collapsed width (thin icon strip)",
+    "type": "string",
+    "defaultValue": "60px",
+    "placeholder": "60px"
+  },
+  {
+    "property": "mod.zen-sidebar-hover.sidebar.expanded-width",
+    "label": "Expanded width on hover",
+    "type": "string",
+    "defaultValue": "260px",
+    "placeholder": "260px"
+  },
+  {
+    "property": "mod.zen-sidebar-hover.sidebar.transition-duration",
+    "label": "Transition duration",
+    "type": "string",
+    "defaultValue": "200ms",
+    "placeholder": "200ms"
+  },
+  {
+    "property": "mod.zen-sidebar-hover.sidebar.mode",
+    "label": "Behavior mode",
+    "type": "dropdown",
+    "options": [
+      { "label": "Push (shift page content)", "value": "push" },
+      { "label": "Overlay (cover page content)", "value": "overlay" }
+    ],
+    "defaultValue": "push"
+  },
+  {
+    "property": "mod.zen-sidebar-hover.sidebar.show-labels-on-hover",
+    "label": "Fade text labels in while hovering",
+    "type": "checkbox",
+    "defaultValue": true
+  }
+]
