@@ -34,10 +34,45 @@ on `:root`), so the native toggle keeps working.
 
 ## Installation
 
-1. Get the `zen-sidebar-hover` folder.
-2. Install in Zen: **Settings → Zen Mods** → load/install the mod folder
-   (`chrome.css`, `preferences.json`, `icon.png`, `README.md`).
-3. Enable the mod.
+### Quick install (Windows)
+
+Run the install script from this repository's root:
+
+```powershell
+powershell -ExecutionPolicy Bypass -File install.ps1
+```
+
+It finds your Zen profile, copies the mod files, and registers the mod.
+Then restart Zen.
+
+### Manual install
+
+> **Note:** Zen's **Import** button in Settings → Zen Mods is for
+> **marketplace mod metadata** (JSON with download URLs), not local files.
+> Local mods are installed by placing files in your profile directory.
+
+1. Open Zen → go to `about:support` → click **Open Profile Directory**.
+2. Navigate to `chrome/zen-themes/` (create it if it doesn't exist).
+3. Create a folder called `zen-sidebar-hover` inside it.
+4. Copy these 4 files into that folder:
+   - `chrome.css`
+   - `preferences.json`
+   - `icon.png`
+   - `README.md`
+5. In the profile root, open (or create) `zen-themes.json`.
+6. Add this entry (merge with any existing content):
+
+```json
+{
+  "zen-sidebar-hover": {
+    "id": "zen-sidebar-hover",
+    "name": "Zen Sidebar Hover",
+    "enabled": true
+  }
+}
+```
+
+7. **Restart Zen.** The mod appears in Settings → Zen Mods.
 
 > `icon.png` in this repo is a generated placeholder (600×400). Replace it
 > with final artwork before submitting to the Mods Registry.
